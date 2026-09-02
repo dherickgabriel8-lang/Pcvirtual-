@@ -1,0 +1,53 @@
+name: Virtual PC Online
+
+on:
+  workflow_dispatch:
+    inputs:
+      access_password:
+        description: "Digite uma senha para o usuário" 
+        default:  required true 
+       
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configurar Senha do Usuário
+        run: |
+          echo "runner:${{ github.event.inputs.access_password }}" | sudo chpasswd
+
+      - name: Instalar Servidor de Área de Trabalho
+        run: |
+          sudo apt updaworkflow_dispatch:
+  inputs:
+    access_password:
+      description: "Defina uma senha para usar"
+      required:true.  cancel-timeout-minutes: 
+           cancel-timeout-minutes: default: "123456"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configuração de Usuário
+        run: |
+          ...
+
+      - name: Atualizar e instalar Servidor de Área de Trabalho
+        run: |
+          sudo apt update
+          sudo apt install -y xfce4 xfce4-goodies
+
+      - name: Instalar o Ngrok
+        uses: ngrok/ngrok-actions@v1
+        with:
+          ...
+          
