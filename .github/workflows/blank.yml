@@ -1,53 +1,52 @@
-name: Virtual PC Online
-on:
-  workflow_dispatch:
-    inputs:
-      access_password:
-        description: "Digite uma senha para o usuário" 
-        default:  required true 
-       
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
+pc-virtual-web/
+├── docker-
+    
+services:
+  pc:
+    build: .
+    privileged: true
+    restart: unless-stopped
+    environment:
+      DISPLAY: ":0"
+    volumes:
+      - ./data:/data
+    ports:
+      - "6080:6080"
+      - "5900:5900"
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      - pc
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web:/usr/share/nginx/html:ro
+      services:
+      FROM ubuntu:24.04
 
-      - name: Configurar Senha do Usuário
-        run: |
-          echo "runner:${{ github.event.inputs.access_password }}" | sudo chpasswd
+ENV DEBIAN_FRONTEND=noninteractive
 
-      - name: Instalar Servidor de Área de Trabalho
-        run: |
-          sudo apt updaworkflow_dispatch:
-  inputs:
-    access_password:
-      description: "Defina uma senha para usar"
-      required:true.  cancel-timeout-minutes: 
-           cancel-timeout-minutes: default: "123456"
+RUN apt-get update && apt-get install -y \
+    qemu-system-x86 \
+    qemu-utils \
+    novnc \
+    websockify \
+    xvfb \
+    x11vnc \
+    fluxbox \
+    wget \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+RUN mkdir -p /data
 
-      - name: Configuração de Usuário
-        run: |
-          ...
+COPY start-vm.sh /start-vm.sh
+RUN chmod +x /start-vm.sh
 
-      - name: Atualizar e instalar Servidor de Área de Trabalho
-        run: |
-          sudo apt update
-          sudo apt install -y xfce4 xfce4-goodies
+EXPOSE 5900 6080
 
-      - name: Instalar o Ngrok
-        uses: ngrok/ngrok-actions@v1
-        with:
-          ...
-
-          
+CMD ["/start-vm.sh"]
